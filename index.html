@@ -140,7 +140,144 @@
             color: rgb(56, 189, 248) !important;
         }
 
-    </style>
+    
+/* Final mobile responsiveness fix */
+@media (max-width: 1023px) {
+    body {
+        overflow-x: hidden !important;
+    }
+
+    header {
+        align-items: flex-start !important;
+    }
+
+    header > div:first-child {
+        width: 100% !important;
+        flex-wrap: wrap !important;
+    }
+
+    header .text-lg {
+        font-size: 1rem !important;
+        line-height: 1.25rem !important;
+    }
+
+    header > div:last-child {
+        width: 100% !important;
+        justify-content: flex-start !important;
+        overflow-x: auto !important;
+    }
+
+    #leftSidebar,
+    #rightSidebar {
+        position: relative !important;
+        transform: none !important;
+        width: 100% !important;
+        height: auto !important;
+        max-height: none !important;
+        border-left: 0 !important;
+        border-right: 0 !important;
+    }
+
+    .flex-1.flex.overflow-hidden.relative {
+        flex-direction: column !important;
+        overflow-y: auto !important;
+        height: auto !important;
+    }
+
+    main {
+        width: 100% !important;
+        min-height: auto !important;
+        overflow: visible !important;
+    }
+
+    aside {
+        flex-shrink: 0 !important;
+    }
+
+    #workspaceContainer {
+        padding: 0.75rem !important;
+        overflow: visible !important;
+    }
+
+    #tab-reports .grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .grid.grid-cols-2.md\:grid-cols-4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        padding: 0.75rem !important;
+    }
+
+    .workspace-tab {
+        min-width: max-content !important;
+        white-space: nowrap !important;
+    }
+
+    .workspace-tab span {
+        font-size: 0.72rem !important;
+    }
+
+    .flex.gap-4 {
+        overflow-x: auto !important;
+        width: 100% !important;
+        gap: 0.75rem !important;
+    }
+
+    #docViewerWrapper {
+        max-width: 100% !important;
+        padding: 1.25rem !important;
+    }
+
+    #docPlainTextContent {
+        font-size: 0.78rem !important;
+    }
+
+    #reportsRenderContent {
+        max-height: 420px !important;
+        overflow-y: auto !important;
+    }
+
+    footer {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+    }
+
+    footer > div {
+        width: 100% !important;
+        flex-wrap: wrap !important;
+    }
+}
+
+@media (max-width: 640px) {
+    .grid.grid-cols-2.md\:grid-cols-4 {
+        grid-template-columns: 1fr !important;
+    }
+
+    #apiKeyInput {
+        width: 10rem !important;
+    }
+
+    #currentActiveDocName {
+        max-width: 220px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    #docViewerControls {
+        width: 100% !important;
+        justify-content: flex-start !important;
+        overflow-x: auto !important;
+    }
+
+    .p-4.md\:p-6,
+    .p-4,
+    .p-6 {
+        padding: 0.75rem !important;
+    }
+}
+
+</style>
 </head>
 <body class="bg-slate-50 text-slate-900 dark:bg-[#020617] dark:text-slate-100 transition-colors duration-300 font-sans h-screen flex flex-col overflow-hidden">
 
