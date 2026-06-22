@@ -277,6 +277,119 @@
     }
 }
 
+
+/* Critical mobile view-order + scrolling fix */
+@media (max-width: 1023px) {
+    html,
+    body {
+        height: auto !important;
+        min-height: 100vh !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+        position: relative !important;
+    }
+
+    body.h-screen {
+        height: auto !important;
+    }
+
+    body > div.flex-1.flex.overflow-hidden.relative,
+    .flex-1.flex.overflow-hidden.relative {
+        display: flex !important;
+        flex-direction: column !important;
+        height: auto !important;
+        min-height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        flex: none !important;
+    }
+
+    #leftSidebar {
+        order: 1 !important;
+        display: flex !important;
+        position: relative !important;
+        transform: none !important;
+        width: 100% !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+
+    main {
+        order: 2 !important;
+        display: flex !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        flex: none !important;
+    }
+
+    #rightSidebar {
+        order: 3 !important;
+        display: flex !important;
+        position: relative !important;
+        transform: none !important;
+        width: 100% !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+
+    #workspaceContainer {
+        display: block !important;
+        height: auto !important;
+        min-height: 500px !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+
+    .workspace-view {
+        min-height: 500px !important;
+        height: auto !important;
+    }
+
+    #tab-viewer {
+        display: block;
+    }
+
+    #tab-viewer .h-full,
+    #tab-text .h-full {
+        height: auto !important;
+        min-height: 500px !important;
+    }
+
+    #pdfViewerScrollContainer {
+        display: flex !important;
+        min-height: 430px !important;
+        max-height: none !important;
+        height: auto !important;
+        overflow: visible !important;
+        padding: 0.75rem !important;
+    }
+
+    #docViewerWrapper {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-height: 420px !important;
+        margin: 0 !important;
+    }
+
+    #viewerContentWrapper,
+    #docPlainTextContent {
+        display: block !important;
+        visibility: visible !important;
+    }
+
+    footer {
+        position: relative !important;
+        height: auto !important;
+        overflow: visible !important;
+    }
+}
+
 </style>
 </head>
 <body class="bg-slate-50 text-slate-900 dark:bg-[#020617] dark:text-slate-100 transition-colors duration-300 font-sans h-screen flex flex-col overflow-hidden">
