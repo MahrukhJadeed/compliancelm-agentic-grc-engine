@@ -2659,7 +2659,7 @@
             }
 
             // Start the Agent consensus progress dashboard inside workspace container
-            const context = buildContext(12000);
+            const context = buildContext(50000);
             const charsUsed = context.length;
             const filesCount = getCurrentDocumentsForContext().length;
             
@@ -3615,7 +3615,40 @@ RESPONSE REQUIREMENTS:
             return activeDoc ? [activeDoc] : [];
         }
 
-        function buildContext(maxChars = 12000) {
+        function buildSmartDocumentContext(doc, budgetChars) {
+            const safeBudget = Math.max(1500, Number(budgetChars) || 50000);
+            const pages = doc.pageTexts && doc.pageTexts.length ? doc.pageTexts : [doc.extractedText || ''];
+            const pageBlocks = pages.map((page, idx) => {
+                const pageText = String(page || '').replace(/\s+/g, ' ').trim();
+                return pageText ? `[${doc.name} | Page ${idx + 1}]\n${pageText}\n` : '';
+            }).filter(Boolean);
+
+            const fullBody = pageBlocks.join('\n');
+            if (fullBody.length <= safeBudget) {
+                return fullBody;
+            }
+
+            // Large-document context strategy:
+            // Instead of sending only the first characters, sample the beginning,
+            // middle, and ending sections so reports see the full document shape.
+            const sectionBudget = Math.floor((safeBudget - 420) / 3);
+            const first = fullBody.slice(0, sectionBudget);
+            const middleStart = Math.max(0, Math.floor(fullBody.length / 2) - Math.floor(sectionBudget / 2));
+            const middle = fullBody.slice(middleStart, middleStart + sectionBudget);
+            const end = fullBody.slice(Math.max(0, fullBody.length - sectionBudget));
+
+            return [
+                `--- BEGINNING SECTION SAMPLE (${Math.min(sectionBudget, first.length).toLocaleString()} chars) ---`,
+                first,
+                `--- MIDDLE SECTION SAMPLE (${Math.min(sectionBudget, middle.length).toLocaleString()} chars) ---`,
+                middle,
+                `--- FINAL SECTION SAMPLE (${Math.min(sectionBudget, end.length).toLocaleString()} chars) ---`,
+                end,
+                `--- SAMPLING NOTE: Source document exceeded ${safeBudget.toLocaleString()} characters. ComplianceLM included beginning, middle and final sections to avoid first-page-only analysis. ---`
+            ].join('\n');
+        }
+
+        function buildContext(maxChars = 50000) {
             const docs = getCurrentDocumentsForContext();
             if (!docs.length) {
                 AppState.lastContextChars = 0;
@@ -3623,35 +3656,16 @@ RESPONSE REQUIREMENTS:
                 return 'NO DOCUMENTS LOADED.';
             }
 
-            const safeMaxChars = Math.max(1000, Number(maxChars) || 12000);
-            let remaining = safeMaxChars;
+            const safeMaxChars = Math.max(1000, Number(maxChars) || 50000);
             const blocks = [];
+            const usableDocs = AppState.contextMode === 'active' ? docs.slice(0, 1) : docs;
+            const perDocBudget = Math.max(1500, Math.floor(safeMaxChars / Math.max(1, usableDocs.length)));
 
-            for (const doc of docs) {
-                if (remaining <= 0) break;
-
+            for (const doc of usableDocs) {
                 const header = `\n\n===== DOCUMENT: ${doc.name} | TYPE: ${doc.type} | PAGES: ${doc.pageCount || 1} | CONTEXT MODE: ${AppState.contextMode.toUpperCase()} =====\n`;
-                if (remaining <= header.length) break;
-
-                let body = '';
-                const pages = doc.pageTexts && doc.pageTexts.length ? doc.pageTexts : [doc.extractedText || ''];
-
-                for (let i = 0; i < pages.length; i++) {
-                    if (remaining <= 500) break;
-
-                    const pageText = String(pages[i] || '').replace(/\s+/g, ' ').trim();
-                    if (!pageText) continue;
-
-                    const pageBlock = `[${doc.name} | Page ${i + 1}]\n${pageText}\n`;
-                    const allowed = Math.max(0, remaining - header.length - body.length);
-                    if (allowed <= 0) break;
-
-                    body += pageBlock.slice(0, allowed);
-                }
-
-                const block = (header + body).slice(0, remaining);
-                blocks.push(block);
-                remaining -= block.length;
+                const bodyBudget = Math.max(1000, perDocBudget - header.length);
+                const body = buildSmartDocumentContext(doc, bodyBudget);
+                blocks.push((header + body).slice(0, perDocBudget));
 
                 // In active mode, never append any second document even if more are loaded.
                 if (AppState.contextMode === 'active') break;
@@ -3659,13 +3673,15 @@ RESPONSE REQUIREMENTS:
 
             const finalContext = blocks.join('\n').slice(0, safeMaxChars);
             AppState.lastContextChars = finalContext.length;
-            AppState.lastContextFiles = docs.length;
+            AppState.lastContextFiles = usableDocs.length;
 
             console.log('[ComplianceLM Context]', {
                 mode: AppState.contextMode,
                 activeDocumentId: AppState.activeDocumentId,
-                filesUsed: docs.map(d => d.name),
+                filesUsed: usableDocs.map(d => d.name),
                 charsUsed: finalContext.length,
+                analysisLimit: safeMaxChars,
+                samplingStrategy: 'beginning-middle-final for documents exceeding per-document budget',
                 totalLoadedDocs: AppState.documents.length
             });
 
@@ -3763,7 +3779,7 @@ RESPONSE REQUIREMENTS:
             switchTab(targetTab);
             const tabContainer = document.getElementById(targetTab);
             
-            const context = buildContext(12000);
+            const context = buildContext(50000);
             const charsUsed = context.length;
             const filesCount = getCurrentDocumentsForContext().length;
             
